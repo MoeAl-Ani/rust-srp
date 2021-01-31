@@ -17,7 +17,7 @@ pub fn hash<D: Digest>(args: &[&[u8]]) -> Output<D> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::hash_helper::hash;
 
     #[test]
     fn test_hashing() {

@@ -21,7 +21,7 @@ pub fn convert_to_bigint(data: &[u8], radix: u32) -> Result<BigUint, std::io::Er
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::bigint_helper::{generate_random_256bit_bigint, convert_to_bigint};
 
     #[test]
     fn test_generate_random() {

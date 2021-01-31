@@ -1,15 +1,17 @@
 #[allow(dead_code)]
-mod helper;
+mod hash_helper;
+pub mod bigint_helper;
+
 use std::borrow::Borrow;
 use std::ops::{Add, Mul};
 
 use num::{BigUint, Zero};
 use sha2::Sha256;
+use bigint_helper::{convert_to_bigint};
 
-use crate::helper::{bigint_helper};
-use crate::helper::bigint_helper::convert_to_bigint;
+
 use std::io::{Error, ErrorKind};
-use crate::helper::hash_helper::hash;
+use crate::hash_helper::hash;
 
 #[derive(Debug)]
 pub struct SrpConfig {
@@ -50,7 +52,7 @@ fn compute_k(config: &SrpConfig) -> BigUint {
 /// * `password` - the client password
 ///
 /// @return The resulting 'x' value.
-fn compute_x(salt: &BigUint, password: &str) -> BigUint {
+pub fn compute_x(salt: &BigUint, password: &str) -> BigUint {
     let x = hash::<Sha256>(&[salt.to_bytes_be().as_slice(), password.as_bytes()]);
     bigint_helper::convert_to_bigint(x.as_slice(), 16).unwrap()
 }
@@ -291,8 +293,6 @@ mod tests {
     use rand::{Rng, thread_rng};
     use rand::distributions::Alphanumeric;
 
-    use crate::helper::bigint_helper;
-
     use super::*;
 
     #[test]
@@ -320,7 +320,7 @@ mod tests {
         let mut rng = thread_rng();
         for _ in 0..10 {
             let salt = bigint_helper::generate_random_256bit_bigint();
-            let username: String = iter::repeat(())
+            let identity: String = iter::repeat(())
                 .map(|()| rng.sample(Alphanumeric))
                 .map(char::from)
                 .take(7)
@@ -331,14 +331,14 @@ mod tests {
                 .take(7)
                 .collect();
 
-            let x = compute_x(&salt, username.as_str());
+            let x = compute_x(&salt, identity.as_str());
             let n = BigUint::parse_bytes(b"B97F8C656C3DF7179C2B805BBCB3A0DC4B0B6926BF66D0A3C63CF6015625CAF9A4DB4BBE7EB34253FAB0E475A6ACFAE49FD5F22C47A71B5532911B69FE7DF4F8ACEE2F7785D75866CF6D213286FC7EBBBE3BE411ECFA10A70F0C8463DC1182C6F9B6F7666C8691B3D1AB6FD78E9CBF8AAE719EA75CA02BE87AE445C698BF0413", 16).unwrap();
             let g = BigUint::parse_bytes(b"2", 10).unwrap();
             let verifier = compute_v(&SrpConfig::new(n,g), &x);
             users.push(User {
                 salt,
                 verifier,
-                username,
+                username: identity,
                 password
             })
         }
