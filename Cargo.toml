@@ -1,5 +1,5 @@
 [package]
-name = "srp"
+name = "srp-flow"
 version = "0.1.0"
 authors = ["Mohammed Al-Ani <mohammedalanny@gmail.com>"]
 edition = "2018"
