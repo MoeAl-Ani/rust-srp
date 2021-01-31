@@ -1,7 +1,6 @@
-#![crate_name = "hash_helper"]
-use sha2::{Sha256, Digest};
+#[allow(dead_code)]
+use sha2::{Digest};
 use sha2::digest::Output;
-use hex;
 
 /// generic hashing function returns generic array
 ///
@@ -19,8 +18,6 @@ pub fn hash<D: Digest>(args: &[&[u8]]) -> Output<D> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use num::{BigUint, Num};
-    use num::bigint::ToBigInt;
 
     #[test]
     fn test_hashing() {
@@ -31,6 +28,6 @@ mod tests {
     #[test]
     fn test_hashing_bigint() {
         let byte_array = hash::<sha2::Sha256>(&[b"12345678"]);
-        let hash = hex::encode_upper(&byte_array[..]);
+        let _hash = hex::encode_upper(&byte_array[..]);
     }
 }

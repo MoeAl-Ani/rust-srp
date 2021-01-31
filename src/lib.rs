@@ -1,17 +1,15 @@
-#![crate_name = "rust_srp"]
 #[allow(dead_code)]
 mod helper;
 use std::borrow::Borrow;
-use std::ops::{Add, Mul, Rem, Sub};
+use std::ops::{Add, Mul};
 
-use num::{BigInt, BigUint, Num, Zero};
-use num_bigint::{ParseBigIntError, ToBigInt};
+use num::{BigUint, Zero};
 use sha2::Sha256;
 
-use crate::helper::{bigint_helper, hash_helper};
+use crate::helper::{bigint_helper};
 use crate::helper::bigint_helper::convert_to_bigint;
-use crate::helper::hash_helper::hash;
 use std::io::{Error, ErrorKind};
+use crate::helper::hash_helper::hash;
 
 #[derive(Debug)]
 pub struct SrpConfig {
@@ -82,7 +80,7 @@ fn compute_u(public_a: &BigUint, public_b: &BigUint) -> BigUint {
 /// * `x` - private password key
 ///
 /// @return The resulting verifier 'v'.
-fn compute_v(srp_config: &SrpConfig, x: &BigUint) -> BigUint {
+pub fn compute_v(srp_config: &SrpConfig, x: &BigUint) -> BigUint {
     srp_config.g.modpow(x, &srp_config.n)
 }
 
@@ -241,7 +239,7 @@ impl SrpClient {
         let k = compute_k(&self.srp_config);
         // Carol: SCarol = (B − kg^x)^(a + ux) = (kv + gb − kg^x)^(a + ux) = (kg^x − kg^x + g^b)^(a + ux) = (g^b)^(a + ux)
         let sc = (public_b - (self.srp_config.g.clone().modpow(&x, &self.srp_config.n)) * k)
-            .modpow(&(self.private_a.clone().unwrap().add((&u.mul(&x)))), &self.srp_config.n);
+            .modpow(&(self.private_a.clone().unwrap().add(&u.mul(&x))), &self.srp_config.n);
         let kc = bigint_helper::convert_to_bigint(hash::<Sha256>(&[sc.borrow().to_bytes_be().as_slice()]).as_slice(), 16).unwrap();
         println!("kc = {}", kc.to_string());
         self.kc = Some(kc);
@@ -290,7 +288,6 @@ pub enum SrpState {
 mod tests {
     use core::iter;
 
-    use num_bigint::Sign;
     use rand::{Rng, thread_rng};
     use rand::distributions::Alphanumeric;
 
@@ -321,7 +318,7 @@ mod tests {
     fn test_srp_client_server() {
         let mut users = vec![];
         let mut rng = thread_rng();
-        for i in 0..10 {
+        for _ in 0..10 {
             let salt = bigint_helper::generate_random_256bit_bigint();
             let username: String = iter::repeat(())
                 .map(|()| rng.sample(Alphanumeric))
@@ -369,7 +366,12 @@ mod tests {
                                     let m_2 = server.step_2(m_1);
                                     match m_2 {
                                         Ok(m_2) => {
-                                            client.step_3(m_2);
+                                            match client.step_3(m_2) {
+                                                Ok(_) => {}
+                                                Err(err) => {
+                                                    panic!("{}", err);
+                                                }
+                                            };
                                         }
                                         Err(err) => {
                                             panic!("{}", err);

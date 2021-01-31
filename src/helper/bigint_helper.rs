@@ -1,5 +1,5 @@
-#![crate_name = "bigint_helper"]
-use num_bigint::{ToBigInt, RandBigInt};
+#[allow(dead_code)]
+use num_bigint::{RandBigInt};
 use num::{BigUint, Num};
 use std::io::ErrorKind;
 
@@ -22,14 +22,10 @@ pub fn convert_to_bigint(data: &[u8], radix: u32) -> Result<BigUint, std::io::Er
 #[cfg(test)]
 mod tests {
     use super::*;
-    use num::{BigInt, Num};
-    use crate::helper::hash_helper;
-    use sha2::Sha256;
-    use std::io::Error;
 
     #[test]
     fn test_generate_random() {
-        let random = generate_random_256bit_bigint();
+        let _random = generate_random_256bit_bigint();
     }
 
     #[test]
