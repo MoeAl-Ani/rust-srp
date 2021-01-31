@@ -10,7 +10,7 @@ use hex;
 ///
 /// ```
 /// use sha2::{Sha256};
-/// use srp::helper::hash_helper::hash;
+/// use rust_srp::helper::hash_helper::hash;
 /// let hash_output = hash::<Sha256>(&[&[1,2,3], b"abc123"]);
 /// let hash_bytes = hash_output.as_slice();
 /// println!("{:?}", hash_bytes);

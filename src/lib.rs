@@ -1,4 +1,4 @@
-#![crate_name = "srp"]
+#![crate_name = "rust_srp"]
 pub mod helper;
 use std::borrow::Borrow;
 use std::ops::{Add, Mul, Rem, Sub};
