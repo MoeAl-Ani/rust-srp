@@ -135,6 +135,7 @@ impl SrpServer {
         let ks = bigint_helper::convert_to_bigint(hash::<Sha256>(&[ks.clone().to_bytes_be().as_slice()]).as_slice(), 16);
         match ks {
             Ok(ks) => {
+                println!("{:?}", ks);
                 self.ks = Some(ks);
             }
             Err(err) => {
@@ -234,10 +235,10 @@ impl SrpClient {
         if public_b.clone().is_zero() || u.clone().is_zero() {
             panic!("bad client auth!");
         }
-        self.u = Some(compute_u(&self.public_a.as_mut().unwrap(), &public_b));
+        self.u = Some(u.clone());
         self.salt = Some(salt.clone());
         self.public_b = Some(public_b.clone());
-        let x = compute_x(&salt, self.username.clone().unwrap().as_str());
+        let x = compute_x(&salt, self.password.clone().unwrap().as_str());
         let k = compute_k(&self.srp_config);
         // Carol: SCarol = (B − kg^x)^(a + ux) = (kv + gb − kg^x)^(a + ux) = (kg^x − kg^x + g^b)^(a + ux) = (g^b)^(a + ux)
         let sc = (public_b - (self.srp_config.g.clone().modpow(&x, &self.srp_config.n)) * k)
@@ -331,7 +332,7 @@ mod tests {
                 .take(7)
                 .collect();
 
-            let x = compute_x(&salt, identity.as_str());
+            let x = compute_x(&salt, password.as_str());
             let n = BigUint::parse_bytes(b"B97F8C656C3DF7179C2B805BBCB3A0DC4B0B6926BF66D0A3C63CF6015625CAF9A4DB4BBE7EB34253FAB0E475A6ACFAE49FD5F22C47A71B5532911B69FE7DF4F8ACEE2F7785D75866CF6D213286FC7EBBBE3BE411ECFA10A70F0C8463DC1182C6F9B6F7666C8691B3D1AB6FD78E9CBF8AAE719EA75CA02BE87AE445C698BF0413", 16).unwrap();
             let g = BigUint::parse_bytes(b"2", 10).unwrap();
             let verifier = compute_v(&SrpConfig::new(n,g), &x);
