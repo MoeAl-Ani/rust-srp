@@ -282,7 +282,7 @@ impl SrpClient {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum SrpState {
+enum SrpState {
     Init, Step1, Step2
 }
 
