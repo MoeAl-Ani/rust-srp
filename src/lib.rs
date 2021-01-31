@@ -41,7 +41,7 @@ fn compute_k(config: &SrpConfig) -> BigUint {
     bigint_helper::convert_to_bigint(k.as_slice(), 16).unwrap()
 }
 
-/// Computes x = H(s | H(P))
+/// Computes x = H(s | P)
 ///
 /// <p>Note that this method differs from the RFC 5054 recommendation
 /// which includes the user identity 'I', i.e. x = H(s | H(I | ":" | P))
