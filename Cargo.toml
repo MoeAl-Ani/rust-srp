@@ -1,0 +1,15 @@
+[package]
+name = "srp"
+version = "0.1.0"
+authors = ["Mohammed Al-Ani <mohammedalanny@gmail.com>"]
+edition = "2018"
+repository = "https://github.com/MoeAl-Ani/rust-srp"
+keywords = ["rust", "srp", "authentication", "security", "crypto"]
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+num = { version = "0.3.1", features = ["num-bigint", "rand", "serde"] }
+rand = "0.7"
+num-bigint = { version = "0.3", features = ["rand"] }
+sha2 = "0.9.2"
+hex = "0.4.2"
