@@ -5,6 +5,8 @@ authors = ["Mohammed Al-Ani <mohammedalanny@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/MoeAl-Ani/rust-srp"
 keywords = ["rust", "srp", "authentication", "security", "crypto"]
+documentation = ""
+readme = "README.md"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
