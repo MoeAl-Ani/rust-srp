@@ -1,5 +1,6 @@
 #![crate_name = "rust_srp"]
-pub mod helper;
+#[allow(dead_code)]
+mod helper;
 use std::borrow::Borrow;
 use std::ops::{Add, Mul, Rem, Sub};
 

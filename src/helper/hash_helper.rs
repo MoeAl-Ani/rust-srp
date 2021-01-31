@@ -3,18 +3,11 @@ use sha2::{Sha256, Digest};
 use sha2::digest::Output;
 use hex;
 
-/// generic hashing function
+/// generic hashing function returns generic array
+///
 /// # Arguments
 /// * `args` - var number of &[u8]
-/// # Examples
 ///
-/// ```
-/// use sha2::{Sha256};
-/// use rust_srp::helper::hash_helper::hash;
-/// let hash_output = hash::<Sha256>(&[&[1,2,3], b"abc123"]);
-/// let hash_bytes = hash_output.as_slice();
-/// println!("{:?}", hash_bytes);
-/// ```
 pub fn hash<D: Digest>(args: &[&[u8]]) -> Output<D> {
     let mut hasher = D::new();
     for arg in args {
