@@ -6,6 +6,7 @@ edition = "2018"
 repository = "https://github.com/MoeAl-Ani/rust-srp"
 keywords = ["rust", "srp", "authentication", "security", "crypto"]
 documentation = ""
+description = "rust secure remote password authentication flow"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 
