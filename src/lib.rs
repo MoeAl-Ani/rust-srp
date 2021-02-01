@@ -135,11 +135,9 @@ impl SrpServer {
         let ks = bigint_helper::convert_to_bigint(hash::<Sha256>(&[ks.clone().to_bytes_be().as_slice()]).as_slice(), 16);
         match ks {
             Ok(ks) => {
-                println!("{:?}", ks);
                 self.ks = Some(ks);
             }
             Err(err) => {
-                println!("error converting to big int for ks {}", err);
                 self.ks = Some(bigint_helper::generate_random_256bit_bigint());
             }
         }
@@ -241,10 +239,13 @@ impl SrpClient {
         let x = compute_x(&salt, self.password.clone().unwrap().as_str());
         let k = compute_k(&self.srp_config);
         // Carol: SCarol = (B − kg^x)^(a + ux) = (kv + gb − kg^x)^(a + ux) = (kg^x − kg^x + g^b)^(a + ux) = (g^b)^(a + ux)
-        let sc = (public_b - (self.srp_config.g.clone().modpow(&x, &self.srp_config.n)) * k)
+        let tmp = (self.srp_config.g.clone().modpow(&x, &self.srp_config.n)) * k;
+        if public_b < tmp {
+            panic!("bad client auth!");
+        }
+        let sc = (public_b - tmp)
             .modpow(&(self.private_a.clone().unwrap().add(&u.mul(&x))), &self.srp_config.n);
         let kc = bigint_helper::convert_to_bigint(hash::<Sha256>(&[sc.borrow().to_bytes_be().as_slice()]).as_slice(), 16).unwrap();
-        println!("kc = {}", kc.to_string());
         self.kc = Some(kc);
         let m_1 = self.compute_m1()?;
         self.m1 = Some(m_1.clone());
@@ -295,10 +296,11 @@ mod tests {
     use rand::distributions::Alphanumeric;
 
     use super::*;
+    use std::time::SystemTime;
 
     #[test]
     fn test_srp_config() {
-        let n = BigUint::parse_bytes(b"B97F8C656C3DF7179C2B805BBCB3A0DC4B0B6926BF66D0A3C63CF6015625CAF9A4DB4BBE7EB34253FAB0E475A6ACFAE49FD5F22C47A71B5532911B69FE7DF4F8ACEE2F7785D75866CF6D213286FC7EBBBE3BE411ECFA10A70F0C8463DC1182C6F9B6F7666C8691B3D1AB6FD78E9CBF8AAE719EA75CA02BE87AE445C698BF0413", 16).unwrap();
+        let n = BigUint::parse_bytes(b"C41C06B5D64E368D2581D791A0233577795106D623130526BFE23528BBE95F1E5F80A6555CD1E5A29FB2FA49547072C7B6D9147C4F8B2209424FBB95DBF70BBB", 16).unwrap();
         let g = BigUint::parse_bytes(b"2", 10).unwrap();
         let config = SrpConfig::new(n,g);
         println!("{:?}", config);
@@ -309,7 +311,7 @@ mod tests {
         let salt = bigint_helper::generate_random_256bit_bigint();
         let x = compute_x(&salt,"pass123");
         println!("private key = {:?}", x);
-        let n = BigUint::parse_bytes(b"B97F8C656C3DF7179C2B805BBCB3A0DC4B0B6926BF66D0A3C63CF6015625CAF9A4DB4BBE7EB34253FAB0E475A6ACFAE49FD5F22C47A71B5532911B69FE7DF4F8ACEE2F7785D75866CF6D213286FC7EBBBE3BE411ECFA10A70F0C8463DC1182C6F9B6F7666C8691B3D1AB6FD78E9CBF8AAE719EA75CA02BE87AE445C698BF0413", 16).unwrap();
+        let n = BigUint::parse_bytes(b"C41C06B5D64E368D2581D791A0233577795106D623130526BFE23528BBE95F1E5F80A6555CD1E5A29FB2FA49547072C7B6D9147C4F8B2209424FBB95DBF70BBB", 16).unwrap();
         let g = BigUint::parse_bytes(b"2", 10).unwrap();
         let verifier = compute_v(&SrpConfig::new(n,g),&x);
         println!("verifier = {:?}", verifier)
@@ -317,9 +319,10 @@ mod tests {
 
     #[test]
     fn test_srp_client_server() {
+        const SIZE: usize = 100;
         let mut users = vec![];
         let mut rng = thread_rng();
-        for _ in 0..10 {
+        for index in 0..SIZE {
             let salt = bigint_helper::generate_random_256bit_bigint();
             let identity: String = iter::repeat(())
                 .map(|()| rng.sample(Alphanumeric))
@@ -333,7 +336,7 @@ mod tests {
                 .collect();
 
             let x = compute_x(&salt, password.as_str());
-            let n = BigUint::parse_bytes(b"B97F8C656C3DF7179C2B805BBCB3A0DC4B0B6926BF66D0A3C63CF6015625CAF9A4DB4BBE7EB34253FAB0E475A6ACFAE49FD5F22C47A71B5532911B69FE7DF4F8ACEE2F7785D75866CF6D213286FC7EBBBE3BE411ECFA10A70F0C8463DC1182C6F9B6F7666C8691B3D1AB6FD78E9CBF8AAE719EA75CA02BE87AE445C698BF0413", 16).unwrap();
+            let n = BigUint::parse_bytes(b"C41C06B5D64E368D2581D791A0233577795106D623130526BFE23528BBE95F1E5F80A6555CD1E5A29FB2FA49547072C7B6D9147C4F8B2209424FBB95DBF70BBB", 16).unwrap();
             let g = BigUint::parse_bytes(b"2", 10).unwrap();
             let verifier = compute_v(&SrpConfig::new(n,g), &x);
             users.push(User {
@@ -341,11 +344,12 @@ mod tests {
                 verifier,
                 username: identity,
                 password
-            })
+            });
         }
 
-        for user in users {
-            let n = BigUint::parse_bytes(b"B97F8C656C3DF7179C2B805BBCB3A0DC4B0B6926BF66D0A3C63CF6015625CAF9A4DB4BBE7EB34253FAB0E475A6ACFAE49FD5F22C47A71B5532911B69FE7DF4F8ACEE2F7785D75866CF6D213286FC7EBBBE3BE411ECFA10A70F0C8463DC1182C6F9B6F7666C8691B3D1AB6FD78E9CBF8AAE719EA75CA02BE87AE445C698BF0413", 16).unwrap();
+        let now = SystemTime::now();
+        for (index, user) in users.iter().enumerate() {
+            let n = BigUint::parse_bytes(b"C41C06B5D64E368D2581D791A0233577795106D623130526BFE23528BBE95F1E5F80A6555CD1E5A29FB2FA49547072C7B6D9147C4F8B2209424FBB95DBF70BBB", 16).unwrap();
             let g = BigUint::parse_bytes(b"2", 10).unwrap();
             let mut client = SrpClient::new(n.clone(),g.clone());
             // do client step 1
@@ -394,9 +398,9 @@ mod tests {
                     panic!("{}", err);
                 }
             }
-
         }
     }
+
 
     struct User {
         username: String,
