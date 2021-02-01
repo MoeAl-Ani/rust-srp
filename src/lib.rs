@@ -30,12 +30,12 @@ impl SrpConfig {
 
 /// Computes the SRP-6 multiplier k = H(N | g)
 ///
-/// <p>Specification: RFC 5054.
+/// Specification: RFC 5054.
 /// # Arguments
 ///
 /// * `SrpConfig` - srp configuration {n, g}
 ///
-/// @return The resulting multiplier 'k'.
+/// The resulting multiplier 'k'.
 fn compute_k(config: &SrpConfig) -> BigUint {
     let k = hash::<Sha256>(&[config.n.to_bytes_be().as_slice(), config.g.to_bytes_be().as_slice()]);
     bigint_helper::convert_to_bigint(k.as_slice(), 16).unwrap()
@@ -43,7 +43,7 @@ fn compute_k(config: &SrpConfig) -> BigUint {
 
 /// Computes x = H(s | P)
 ///
-/// <p>Note that this method differs from the RFC 5054 recommendation
+/// Note that this method differs from the RFC 5054 recommendation
 /// which includes the user identity 'I', i.e. x = H(s | H(I | ":" | P))
 ///
 /// # Arguments
@@ -51,7 +51,7 @@ fn compute_k(config: &SrpConfig) -> BigUint {
 /// * `salt` - small random unsigned salt
 /// * `password` - the client password
 ///
-/// @return The resulting 'x' value.
+/// The resulting 'x'.
 pub fn compute_x(salt: &BigUint, password: &str) -> BigUint {
     let x = hash::<Sha256>(&[salt.to_bytes_be().as_slice(), password.as_bytes()]);
     bigint_helper::convert_to_bigint(x.as_slice(), 16).unwrap()
@@ -66,7 +66,7 @@ pub fn compute_x(salt: &BigUint, password: &str) -> BigUint {
 /// * `public_a` - The public client value 'A'
 /// * `public_b` - The public server value 'B'
 ///
-/// @return The resulting 'u' value.
+/// The resulting 'u' value.
 fn compute_u(public_a: &BigUint, public_b: &BigUint) -> BigUint {
     let hash = hash::<Sha256>(&[public_a.to_bytes_be().as_slice(), public_b.to_bytes_be().as_slice()]);
     bigint_helper::convert_to_bigint(hash.as_slice(), 16).unwrap()
@@ -81,7 +81,7 @@ fn compute_u(public_a: &BigUint, public_b: &BigUint) -> BigUint {
 /// * `SrpConfig` - srp configuration {n, g}
 /// * `x` - private password key
 ///
-/// @return The resulting verifier 'v'.
+///  The resulting verifier 'v'.
 pub fn compute_v(srp_config: &SrpConfig, x: &BigUint) -> BigUint {
     srp_config.g.modpow(x, &srp_config.n)
 }
