@@ -8,7 +8,7 @@ Add the library to your `cargo.toml`:
 ```bash
 [dependencies]
 ...
-rust-srp = "0.1.6"
+rust-srp = "0.1.8"
 ...
 ```
 
