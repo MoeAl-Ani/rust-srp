@@ -1,7 +1,7 @@
 [package]
 name = "rust_srp"
 version = "0.1.7"
-authors = ["Mohammed Al-Ani <mohammedalanny@gmail.com>"]
+authors = ["Mohammed Al-Ani <mohammedalanny@gmail.com>", "Janne Tahkola <janne.tahkola@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/MoeAl-Ani/rust-srp"
 keywords = ["rust", "srp", "authentication", "security", "crypto"]
