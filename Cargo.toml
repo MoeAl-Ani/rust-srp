@@ -1,6 +1,6 @@
 [package]
 name = "rust_srp"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Mohammed Al-Ani <mohammedalanny@gmail.com>", "Janne Tahkola <janne.tahkola@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/MoeAl-Ani/rust-srp"
